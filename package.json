@@ -44,7 +44,7 @@
     "spaceschema": "^0.0.3",
     "index-encoder": "^3.3.2",
     "resolve-reject-promise": "^1.1.0",
-    "rocksdb-native": "^3.5.10",
+    "rocksdb-native": "^3.1.1",
     "scope-lock": "^1.2.4",
     "streamx": "^2.22.0"
   },
