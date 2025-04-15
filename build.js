@@ -1,8 +1,8 @@
-const Hyperschema = require('hyperschema')
+const Spaceschema = require('spaceschema')
 
-const SPEC = './spec/hyperschema'
+const SPEC = './spec/spaceschema'
 
-const schema = Hyperschema.from(SPEC, { versioned: false })
+const schema = Spaceschema.from(SPEC, { versioned: false })
 const corestore = schema.namespace('corestore')
 
 corestore.register({
@@ -272,4 +272,4 @@ core.register({
   }]
 })
 
-Hyperschema.toDisk(schema, SPEC)
+Spaceschema.toDisk(schema, SPEC)

@@ -2,7 +2,7 @@ const test = require('brittle')
 const b4a = require('b4a')
 const { createCore, create, writeBlocks, readBlocks } = require('./helpers')
 
-test('read and write hypercore blocks', async (t) => {
+test('read and write spacecore blocks', async (t) => {
   const core = await createCore(t)
   await writeBlocks(core, 2)
 
@@ -15,7 +15,7 @@ test('read and write hypercore blocks', async (t) => {
   t.is(res[2], null)
 })
 
-test('read and write hypercore blocks across multiple cores', async (t) => {
+test('read and write spacecore blocks across multiple cores', async (t) => {
   const storage = await create(t)
   const keys0 = {
     key: b4a.from('0'.repeat(64), 'hex'),
@@ -69,7 +69,7 @@ test('read and write hypercore blocks across multiple cores', async (t) => {
   await storage.close()
 })
 
-test('delete hypercore block', async (t) => {
+test('delete spacecore block', async (t) => {
   const core = await createCore(t)
   await writeBlocks(core, 2)
 
@@ -88,7 +88,7 @@ test('delete hypercore block', async (t) => {
   t.is(res2, null)
 })
 
-test('delete hypercore block range', async (t) => {
+test('delete spacecore block range', async (t) => {
   const core = await createCore(t)
   await writeBlocks(core, 4)
 
@@ -279,7 +279,7 @@ test('set and get auth', async (t) => {
   }
 })
 
-test('set and get hypercore sessions', async (t) => {
+test('set and get spacecore sessions', async (t) => {
   const core = await createCore(t)
   {
     const rx = core.read()
@@ -311,7 +311,7 @@ test('set and get hypercore sessions', async (t) => {
   }
 })
 
-test('set and get hypercore head', async (t) => {
+test('set and get spacecore head', async (t) => {
   const core = await createCore(t)
   {
     const rx = core.read()
@@ -347,7 +347,7 @@ test('set and get hypercore head', async (t) => {
   }
 })
 
-test('set and get hypercore dependency', async (t) => {
+test('set and get spacecore dependency', async (t) => {
   const core = await createCore(t)
   {
     const rx = core.read()
@@ -379,7 +379,7 @@ test('set and get hypercore dependency', async (t) => {
   }
 })
 
-test('set and get hypercore hints', async (t) => {
+test('set and get spacecore hints', async (t) => {
   const core = await createCore(t)
   {
     const rx = core.read()
@@ -407,7 +407,7 @@ test('set and get hypercore hints', async (t) => {
   }
 })
 
-test('set and get hypercore userdata', async (t) => {
+test('set and get spacecore userdata', async (t) => {
   const core = await createCore(t)
   {
     const rx = core.read()
@@ -439,7 +439,7 @@ test('set and get hypercore userdata', async (t) => {
   }
 })
 
-test('delete hypercore userdata', async (t) => {
+test('delete spacecore userdata', async (t) => {
   const core = await createCore(t)
 
   {

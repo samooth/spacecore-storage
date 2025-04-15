@@ -1,4 +1,4 @@
-const RocksDB = require('rocksdb-native')
+const RocksDb = require('rocksdb-native')
 const rrp = require('resolve-reject-promise')
 const ScopeLock = require('scope-lock')
 const View = require('./lib/view.js')
@@ -73,7 +73,7 @@ class Atom {
   }
 }
 
-class HypercoreStorage {
+class SpacecoreStorage {
   constructor (store, db, core, view, atom) {
     this.store = store
     this.db = db
@@ -176,12 +176,12 @@ class HypercoreStorage {
   }
 
   snapshot () {
-    return new HypercoreStorage(this.store, this.db.snapshot(), this.core, this.view.snapshot(), this.atom)
+    return new SpacecoreStorage(this.store, this.db.snapshot(), this.core, this.view.snapshot(), this.atom)
   }
 
   atomize (atom) {
     if (this.atom && this.atom !== atom) throw new Error('Cannot atomize and atomized session with a new atom')
-    return new HypercoreStorage(this.store, this.db.session(), this.core, atom.view, atom)
+    return new SpacecoreStorage(this.store, this.db.session(), this.core, atom.view, atom)
   }
 
   createAtom () {
@@ -234,7 +234,7 @@ class HypercoreStorage {
     const dependency = await dependencyPromise
     if (dependency) core.dependencies = this._addDependency(dependency)
 
-    return new HypercoreStorage(this.store, this.db.session(), core, this.atom ? this.view : new View(), this.atom)
+    return new SpacecoreStorage(this.store, this.db.session(), core, this.atom ? this.view : new View(), this.atom)
   }
 
   async createSession (name, head) {
@@ -285,7 +285,7 @@ class HypercoreStorage {
 
     await tx.flush()
 
-    return new HypercoreStorage(this.store, this.db.session(), core, this.atom ? this.view : new View(), this.atom)
+    return new SpacecoreStorage(this.store, this.db.session(), core, this.atom ? this.view : new View(), this.atom)
   }
 
   async createAtomicSession (atom, head) {
@@ -348,7 +348,7 @@ class HypercoreStorage {
 class CorestoreStorage {
   constructor (db, opts) {
     this.path = typeof db === 'string' ? db : db.path
-    this.rocks = typeof db === 'string' ? new RocksDB(db, opts) : db
+    this.rocks = typeof db === 'string' ? new RocksDb(db, opts) : db
     this.db = createColumnFamily(this.rocks, opts)
     this.view = null
     this.enters = 0
@@ -733,7 +733,7 @@ class CorestoreStorage {
       dataPointer = dependency.dataPointer
     }
 
-    const result = new HypercoreStorage(this, this.db.session(), core, EMPTY, null)
+    const result = new SpacecoreStorage(this, this.db.session(), core, EMPTY, null)
 
     if (version < VERSION) await this._migrateCore(result, discoveryKey, version, create)
     return result
@@ -783,7 +783,7 @@ class CorestoreStorage {
 
     tx.apply()
 
-    return new HypercoreStorage(this, this.db.session(), ptr, EMPTY, null)
+    return new SpacecoreStorage(this, this.db.session(), ptr, EMPTY, null)
   }
 
   async create (data) {
@@ -836,7 +836,7 @@ function createColumnFamily (db, opts = {}) {
     optimizeFiltersForMemory = false
   } = opts
 
-  const col = new RocksDB.ColumnFamily(COLUMN_FAMILY, {
+  const col = new RocksDb.ColumnFamily(COLUMN_FAMILY, {
     enableBlobFiles: true,
     minBlobSize: 4096,
     blobFileSize: 256 * 1024 * 1024,

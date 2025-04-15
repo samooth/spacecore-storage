@@ -1,11 +1,11 @@
 {
-  "name": "hypercore-storage",
-  "version": "1.8.7",
+  "name": "spacecore-storage",
+  "version": "0.0.1",
   "main": "index.js",
   "files": [
     "index.js",
     "lib/*.js",
-    "spec/hyperschema/*.js",
+    "spec/spaceschema/*.js",
     "migrations/0/*.js"
   ],
   "scripts": {
@@ -14,8 +14,15 @@
     "test:generate": "brittle -r test/all.js test/*.js"
   },
   "author": "Holepunch Inc.",
+  "contributors": [
+    {
+      "name": "Tomás Díaz",
+      "email": "tomas@bsv.direct",
+      "url": "https://bsv.direct"
+    }
+  ],  
   "license": "Apache-2.0",
-  "description": "Storage engine for Hypercore",
+  "description": "Storage engine for Spacecore",
   "imports": {
     "fs": {
       "bare": "bare-fs",
@@ -31,9 +38,10 @@
     "bare-fs": "^4.0.1",
     "bare-path": "^3.0.0",
     "compact-encoding": "^2.16.0",
+    "device-file": "^1.2.2",
     "flat-tree": "^1.12.1",
-    "hypercore-crypto": "^3.4.2",
-    "hyperschema": "^1.7.0",
+    "spacecore-crypto": "^0.0.2",
+    "spaceschema": "^0.0.1",
     "index-encoder": "^3.3.2",
     "resolve-reject-promise": "^1.0.0",
     "rocksdb-native": "^3.1.1",

@@ -13,7 +13,7 @@ const {
   getBitfieldPages
 } = require('./helpers')
 
-test('read and write hypercore blocks from snapshot', async (t) => {
+test('read and write spacecore blocks from snapshot', async (t) => {
   const core = await createCore(t)
   await writeBlocks(core, 2)
 

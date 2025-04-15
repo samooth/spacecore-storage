@@ -1,17 +1,17 @@
-# hypercore-storage
+# spacecore-storage
 
-The storage engine for Hypercore. Built on RocksDB.
+The storage engine for Spacecore. Built on RocksDB.
 
 ```
-npm install hypercore-storage
+npm install spacecore-storage
 ```
 
 ## API
 
-The following API is what Hypercore 11 binds to to do I/O.
+The following API is what Spacecore 11 binds to to do I/O.
 
 ```js
-const Storage = require('hypercore-storage')
+const Storage = require('spacecore-storage')
 ```
 
 #### `store = new Storage(dbOrPath)`
