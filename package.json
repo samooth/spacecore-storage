@@ -41,7 +41,7 @@
     "device-file": "^1.2.2",
     "flat-tree": "^1.12.1",
     "spacecore-crypto": "^0.0.2",
-    "spaceschema": "^0.0.1",
+    "spaceschema": "^0.0.3",
     "index-encoder": "^3.3.2",
     "resolve-reject-promise": "^1.0.0",
     "rocksdb-native": "^3.1.1",
