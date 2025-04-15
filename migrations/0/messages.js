@@ -1,4 +1,4 @@
-// needed here for compat, copied from old hypercore, do not change this
+// needed here for compat, copied from old spacecore, do not change this
 
 const c = require('compact-encoding')
 const b4a = require('b4a')
