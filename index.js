@@ -1,6 +1,9 @@
-const RocksDb = require('rocksdb-native')
+const RocksDB = require('rocksdb-native')
 const rrp = require('resolve-reject-promise')
 const ScopeLock = require('scope-lock')
+const DeviceFile = require('device-file')
+const path = require('path')
+const fs = require('fs')
 const View = require('./lib/view.js')
 
 const VERSION = 1
@@ -18,6 +21,7 @@ const {
 const {
   createCoreStream,
   createAliasStream,
+  createDiscoveryKeyStream,
   createBlockStream,
   createBitfieldStream,
   createUserDataStream,
@@ -346,10 +350,20 @@ class SpacecoreStorage {
 }
 
 class CorestoreStorage {
-  constructor (db, opts) {
-    this.path = typeof db === 'string' ? db : db.path
-    this.rocks = typeof db === 'string' ? new RocksDb(db, opts) : db
+  constructor (db, opts = {}) {
+    const storage = typeof db === 'string' ? db : null
+
+    this.bootstrap = storage !== null
+    this.path = storage !== null ? storage : path.join(db.path, '..')
+    this.readOnly = !!opts.readOnly
+    this.allowBackup = !!opts.allowBackup
+
+    // tmp sync fix for simplicty since not super deployed yet
+    if (this.bootstrap && !this.readOnly) tmpFixStorage(this.path)
+
+    this.rocks = storage === null ? db : new RocksDB(path.join(this.path, 'db'), opts)
     this.db = createColumnFamily(this.rocks, opts)
+    this.id = opts.id || null
     this.view = null
     this.enters = 0
     this.lock = new ScopeLock()
@@ -369,6 +383,25 @@ class CorestoreStorage {
   async ready () {
     if (this.version === 0) await this._migrateStore()
     return this.db.ready()
+  }
+
+  async audit () {
+    for await (const { core } of this.createCoreStream()) {
+      const coreRx = new CoreRX(core, this.db, EMPTY)
+      const authPromise = coreRx.getAuth()
+
+      coreRx.tryFlush()
+
+      const auth = await authPromise
+
+      if (!auth.manifest || auth.manifest.version > 0) continue
+      if (auth.manifest.linked === null) continue
+
+      auth.manifest.linked = null
+      const coreTx = new CoreTX(core, this.db, null, [])
+      coreTx.setAuth(auth)
+      await coreTx.flush()
+    }
   }
 
   async deleteCore (ptr) {
@@ -394,10 +427,12 @@ class CorestoreStorage {
     const end = core.core(ptr.corePointer + 1)
     tx.tryDeleteRange(start, end)
 
-    for (const { dataPointer } of sessions) {
-      const start = core.data(dataPointer)
-      const end = core.data(dataPointer + 1)
-      tx.tryDeleteRange(start, end)
+    if (sessions) {
+      for (const { dataPointer } of sessions) {
+        const start = core.data(dataPointer)
+        const end = core.data(dataPointer + 1)
+        tx.tryDeleteRange(start, end)
+      }
     }
 
     return tx.flush()
@@ -425,6 +460,16 @@ class CorestoreStorage {
 
     try {
       if (this.version === VERSION) return
+
+      await this.db.ready()
+
+      if (this.bootstrap && !this.readOnly && !this.allowBackup) {
+        const corestoreFile = path.join(this.path, 'CORESTORE')
+
+        if (!(await DeviceFile.resume(corestoreFile, { id: this.id }))) {
+          await DeviceFile.create(corestoreFile, { id: this.id })
+        }
+      }
 
       const rx = new CorestoreRX(this.db, view)
       const headPromise = rx.getHead()
@@ -557,6 +602,10 @@ class CorestoreStorage {
     return new Atom(this.db)
   }
 
+  async flush () {
+    await this.rocks.flush()
+  }
+
   async close () {
     if (this.db.closed) return
     await this._flush()
@@ -584,6 +633,10 @@ class CorestoreStorage {
   createAliasStream (namespace) {
     // TODO: be nice to run the mgiration here also, but too much plumbing atm
     return createAliasStream(this.db, EMPTY, namespace)
+  }
+
+  createDiscoveryKeyStream (namespace) {
+    return createDiscoveryKeyStream(this.db, EMPTY, namespace)
   }
 
   async getAlias (alias) {
@@ -836,7 +889,7 @@ function createColumnFamily (db, opts = {}) {
     optimizeFiltersForMemory = false
   } = opts
 
-  const col = new RocksDb.ColumnFamily(COLUMN_FAMILY, {
+  const col = new RocksDB.ColumnFamily(COLUMN_FAMILY, {
     enableBlobFiles: true,
     minBlobSize: 4096,
     blobFileSize: 256 * 1024 * 1024,
@@ -849,4 +902,28 @@ function createColumnFamily (db, opts = {}) {
   })
 
   return db.columnFamily(col)
+}
+
+// TODO: remove in like 3-6 mo
+function tmpFixStorage (p) {
+  // if CORESTORE file is written, new format
+  if (fs.existsSync(path.join(p, 'CORESTORE'))) return
+
+  let files = []
+
+  try {
+    files = fs.readdirSync(p)
+  } catch {}
+
+  const notRocks = new Set(['CORESTORE', 'primary-key', 'cores', 'app-preferences', 'cache', 'preferences.json', 'db', 'clone', 'core', 'notifications'])
+
+  for (const f of files) {
+    if (notRocks.has(f)) continue
+
+    try {
+      fs.mkdirSync(path.join(p, 'db'))
+    } catch {}
+
+    fs.renameSync(path.join(p, f), path.join(p, 'db', f))
+  }
 }
