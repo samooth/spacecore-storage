@@ -1,6 +1,6 @@
 {
   "name": "spacecore-storage",
-  "version": "1.14.0",
+  "version": "0.0.7",
   "main": "index.js",
   "files": [
     "index.js",
