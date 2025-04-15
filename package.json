@@ -1,6 +1,6 @@
 {
   "name": "spacecore-storage",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "index.js",
   "files": [
     "index.js",
@@ -20,7 +20,7 @@
       "email": "tomas@bsv.direct",
       "url": "https://bsv.direct"
     }
-  ],  
+  ],
   "license": "Apache-2.0",
   "description": "Storage engine for Spacecore",
   "imports": {
