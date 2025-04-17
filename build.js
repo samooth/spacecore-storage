@@ -1,6 +1,6 @@
 const Spaceschema = require('spaceschema')
 
-const SPEC = './spec/spaceschema'
+const SPEC = './spec/hyperschema'
 
 const schema = Spaceschema.from(SPEC, { versioned: false })
 const corestore = schema.namespace('corestore')
